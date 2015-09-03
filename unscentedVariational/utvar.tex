@@ -1,0 +1,271 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{epsfig,latexsym,amsbsy,amssymb,amsmath,color, url, natbib, booktabs, multirow,xspace}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{natbib}
+\usepackage{algorithm,algorithmic}
+\oddsidemargin  0.0in
+\evensidemargin 0.0in
+\textwidth      6.5in
+\headheight     0.0in
+\topmargin     -1.0in
+\textheight=10.0in
+\parindent=0in 
+
+\input{macros.tex}
+
+\newcommand{\ut}{{\sc ut}\xspace}
+\newcommand{\x}{\vec{x}}
+\newcommand{\y}{\vec{y}}
+\renewcommand{\xi}{\x^{(i)}}
+\newcommand{\yi}{\y^{(i)}}
+%\renewcommand{\A}{\mat{A}}
+\renewcommand{\b}{\vec{b}}
+\newcommand{\xbar}{\bar{\x}}
+\newcommand{\ybar}{\bar{\y}}
+\newcommand{\Sigmaxx}{\mat{\Sigma}_{xx}}
+\newcommand{\Sigmayx}{\mat{\Sigma}_{yx}}
+\newcommand{\grad}{\nabla}
+\newcommand{\loss}{\calL(\A,\b)}
+
+\newcommand{\w}{u}
+\newcommand{\wi}{u_i}
+\newcommand{\wbar}{\bar{\w}}
+\newcommand{\wo}{\w_0}
+
+
+\newcommand{\qx}{q(\x)}
+\newcommand{\m}{\vec{m}}
+%\newcommand{\C}{\mat{C}}
+\newcommand{\xo}{\x^{(0)}}
+\renewcommand{\Q}{Q}
+\renewcommand{\P}{P}
+\renewcommand{\k}{\kappa}
+\newcommand{\mathcol}[2]{  \left[#1\right]_{\cdot, #2} } 
+\newcommand{\rks}{{\sc rks}}
+\newcommand{\ugp}{{\sc ugp}}
+\newcommand{\f}{\vec{f}}
+\newcommand{\fn}{\f_{n \cdot}}
+\newcommand{\An}{\mat{A}_n} 
+\newcommand{\bn}{\vec{b}_n} 
+\renewcommand{\W}{\mat{W}}
+\newcommand{\phin}{\vecS{\phi}_n}
+\newcommand{\mufn}{\vecS{\mu}_{fn}}
+\newcommand{\Sigmafn}{\mat{\Sigma}_{fn}}
+\newcommand{\M}{\mat{M}}
+\renewcommand{\D}{D} 
+\newcommand{\fnq}{f_{nq}}
+\newcommand{\var}[1]{\mathbb{V}[#1]}
+
+\title{Using the Unscented Transform in Variational Inference}
+\author{Edwin V.~Bonilla}
+\begin{document}
+\maketitle
+We derive the updates for the linearization parameters of a non-linear forward model
+using the unscented transform (\ut). This is useful within a variational inference framework,
+when we fix the posterior parameters and want to update the linear model. 
+%
+We start with deriving the equations for statistical linearization (simply fitting a linear model) 
+through least squares, then using weighted least squares (when each observation has a 
+weight associated with it) and show the equivalent expressions when the \ut
+is used to generate the training data.
+
+\section{Statistical Linearization}
+Given $N$ observations $\{ \xi, \yi\}_{i=1}^N$ of a non linear function $\y = g(\x)$, where 
+$\x \in \Re^\Q$ and $\y \in \Re^\P$ we want to fit a linear model of the form:
+\begin{align}
+	f(\x) = \A \x + \b \text{,}
+\end{align}
+where $\A$ is a $\P \times  \Q$ matrix and $\b$ is a $\P$-dimensional vector, so as to 
+minimize the squared loss:
+\begin{align}
+	\label{eq:loss}
+	\loss = \sum_{i=1}^N \norm{\A \xi + \b - \yi }_2^2 \text{.}
+\end{align}
+Let us define the following statistics:
+\begin{align}
+	\xbar & = \frac{1}{N} \sum_{i=1}^N \xi \\
+	\ybar & = \frac{1}{N} \sum_{i=1}^N \yi \\
+	\Sigmaxx & = \sum_{i=1}^N (\xi - \xbar) (\xi - \xbar)^T \\
+	\Sigmayx & = \sum_{i=1}^N (\yi - \ybar) (\xi - \xbar)^T \text{.}
+\end{align}
+Taking the gradient of Equation \eqref{eq:loss} with respect to $\b$  and equating it to zero we have that:
+\begin{align}
+	\grad_{\b} \loss &= 2 \sum_{i=1}^N ( \A \xi + \b - \yi )   = 0 \\
+	\label{eq:b}
+		\b & = \ybar - \A \xbar \text{.}
+\end{align}
+Replacing the value of this in Equation $\eqref{eq:loss}$:
+\begin{align}
+	\loss &= \sum_{i=1}^N \norm{\A (\xi  -\xbar) -  (\yi - \ybar) }_2^2 \\
+	\grad_{\A} \loss & =\sum_{i=1}^N \left(\A (\xi  -\xbar) -  (\yi - \ybar) \right) (\xi  -\xbar)^T = 0 \\	
+	& = \A \sum_{i=1}^N (\xi  -\xbar)  (\xi  -\xbar)^T = \sum_{i=1}^N (\yi - \ybar)  (\xi  -\xbar)^T \\
+	\A \Sigmaxx & = \Sigmayx \\
+		\label{eq:A}
+	\A & =  \Sigmayx  \Sigmaxx^{-1} \text{.}
+\end{align}
+Therefore, the solution to our linearization problem is given by Equation \eqref{eq:b} and
+\eqref{eq:A}. 
+\section{Weighted Least Squares}
+In weighted least squares each observation has a weight $\{ \wi \}$ associated with it (e.g.~an inverse
+variance) and the corresponding loss is:
+\begin{equation}
+	 \loss  = \sum_{i=1}^N \w_i  \norm{\A \xi + \b - \yi }_2^2  \text{.}
+\end{equation}
+The solution is similar to that obtained before:
+\begin{align}
+	\label{eq:b-w}
+	\b & = \frac{1}{\wbar} (\ybar - \A \xbar) \\
+	\label{eq:A-w}	
+	\A & = \Sigmayx \Sigmaxx^{-1} \text{,}
+\end{align}
+where we have (re)defined the statistics:
+\begin{align}
+	\wbar & = \sum_{i=1}^N \wi\\	
+	\xbar & =  \sum_{i=1}^N \wi \xi \\
+	\ybar & =  \sum_{i=1}^N \wi \yi \\
+	\label{eq:Sigmaxx-w}
+	\Sigmaxx & = \sum_{i=1}^N \wi (\xi - \xbar) (\xi - \xbar)^T \\
+	\label{eq:Sigmayx-w}
+	\Sigmayx & = \sum_{i=1}^N \wi (\yi - \ybar) (\xi - \xbar)^T \text{.}
+\end{align}
+\section{Variational Inference and the Unscented Transform}
+In variational inference we need to compute an expectation of a non-linear 
+function $g(\x)$ over the current posterior estimate. When the  
+posterior is a $\Q$-dimensional Gaussian $\qx = \Normal(\x; \m, \C)$, we can linearize 
+$g(\x) \approx \A \x + \b$ around the current posterior estimate 
+and use weighted least squares. The main question 
+is what ``training" data  can we use to fit the linear model? Although we can 
+sample from $\qx$ to generate these data, the unscented transform (\ut) provides 
+a deterministic and more  elegant solution. 
+
+The \ut revolves around the definition of $N=2Q+1$ so-called sigma-points:
+\begin{align}
+	\xo & = \m \text{,} \\
+	\xi &= \m + \mathcol{\sqrt{(\Q + \k) \C}}{i} \quad i = 1, \ldots, \Q \\
+	\xi &= \m - \mathcol{\sqrt{(\Q + \k) \C}}{i-\Q} \quad i = \Q+1, \ldots, 2\Q \text{,} \\
+% \end{align}
+& \text { and the corresponding observations with weights:} \\
+% \begin{align}
+	\yi & = g(\xi) \quad i = 0, \quad \ldots 2\Q\\
+	\wo &= \frac{\k}{\Q + \k} \\
+	\wi &= \frac{1}{2(\Q + \k)}  \quad  i = 1, \ldots, 2\Q  \text{,}
+\end{align}	
+where $\mathcol{\mat{B}}{i}$ denotes the $i\mth$ column of matrix $\mat{B}$.
+We note in passing that $\k=1/2$ corresponds to uniform weights $\wi = 1/(2\Q+1)$. \\
+
+Having the training data generated by the \ut, now it is simply a matter of
+deriving the expressions for the statistics $\wbar$, $\xbar$, $\ybar$, $\Sigmaxx$, $\Sigmayx$
+and the linearization parameters $\A, \b$. 
+
+For the weights we have that:
+\begin{equation}
+	\wbar = \sum_{i=0}^{2\Q} \wi = \frac{\k}{\Q + \k} + \frac{2\Q}{2 (\Q + \k)} = 1 \text{.}
+\end{equation}
+Similarly for $\xbar$:
+\begin{align}
+	\xbar &= \sum_{i=o}^{2\Q} \wi \xi \\
+	&= \frac{\k}{\Q + \k} \m + \frac{1}{2(\Q + \k)} \sum_{i=1}^{2\Q} \xi \\
+	& = \frac{\k}{\Q + \k} \m + \frac{2 \Q}{2 (\Q + \k)} \m  = \wbar \m  \\
+	&= \m.
+\end{align}
+For the output statistic $\ybar$ is the same as before:
+\begin{equation}
+	\label{eq:ybar-ut}
+	\ybar  =  \sum_{i=0}^{2 \Q} \wi \yi \text{.}
+\end{equation}
+%
+The statistic $\Sigmayx$, using Equation 	\eqref{eq:Sigmayx-w}, is given by:
+\begin{align}
+	\Sigmayx & = \sum_{i=0}^{2\Q} \wi (\yi - \ybar) (\xi - \xbar)^T \\
+	\label{eq:Sigmayx-ut}
+	& = \sum_{i=0}^{2\Q} \wi (\yi - \ybar) (\xi - \m)^T \text{.}
+\end{align}
+Similarly, from Equation \eqref{eq:Sigmaxx-w}, $\Sigmaxx$ is:
+\begin{align}
+\Sigmaxx & = \sum_{i=0}^{2 \Q} \wi (\xi - \xbar) (\xi - \xbar)^T \text{,}
+\end{align}
+where we have that for $i=0$ $\Sigmaxx = \mat{0}$ and for $i >0$ :
+\begin{align}
+	\xi - \xbar & = \m \pm   \mathcol{\sqrt{(\Q + \k) \C}}{i} - \m \\
+ 	(\xi - \xbar) (\xi - \xbar)^T & = (\Q + \k)  \mathcol{\sqrt{\C}}{i}  \mathcol{\sqrt{\C}}{i}^T \text{,}
+\end{align}
+therefore:
+\begin{align}
+	\Sigmaxx & = 2 \sum_{i=1}^{\Q}  \frac{(\Q + \k)}{2 (\Q + \k)} \mathcol{\sqrt{\C}}{i}  \mathcol{\sqrt{\C}}{i}^T\\
+	&= (\sqrt{\C})^T  \sqrt{\C} \\
+	& = \C \text{.}
+\end{align}
+Therefore, Equations \eqref{eq:b-w} and  \eqref{eq:A-w} becomes:
+\begin{align}
+	\b &= \ybar - \A \m \text{,} \\
+	\A &= \Sigmayx \C^{-1} 
+	\text{,}
+\end{align}
+where $\ybar$ is given in Equation \eqref{eq:ybar-ut}; and 
+$\Sigmayx$ is given in Equation  \eqref{eq:Sigmayx-ut}. 
+%
+\section{Multi-purpose Unscented Kitchen Sinks}
+Would not we like a multi-purpose unscented kitchen sink :-) ? In a Random Kitchen Sink (\rks)
+approximation to the multiple output version of the unscented Gaussian process (\ugp, \fix{Steinberg
+and Bonilla, 2014}) we need to linearize: $g(\fn)$, where $\fn$ is a $\Q$-dimensional random variable corresponding to the $\Q$ latent function values at datapoint $n$:
+\begin{align}
+	g(\fn) & \approx \An \fn + \bn \quad \text{with }\\
+	\label{eq:fn}
+\fn &=  \W \phin \text{.}
+\end{align}
+The main point to notice here is that we are interested in linearizing $g(\fn)$ as a function of $\fn$. 
+Therefore, we will work on $\fn$-space and use Equation \eqref{eq:fn} to compute the corresponding
+moments. For the mean we have:
+\begin{equation}
+	\mufn = \M \phin \text{,}
+\end{equation}
+where $M$ is a $\Q \times \D$  matrix with the posterior means $\{ \m_q\}_{q=1}^{Q}$ (over 
+the weights) on its rows. \\
+
+Interestingly, the covariance $\Sigmafn$ has a diagonal structure as, by definition of our 
+approximate posterior, there is no correlation across latent functions, i.e.:
+\begin{equation}
+	\fnq = \sum_{d=1}^{\D} \phi_{nd} w_{dq} \text{.}
+\end{equation}
+Therefore:
+\begin{align}
+	\Sigmafn &= \diag(\var{\fn}) \text{,} \quad \text{where } \\
+	\var{\fnq} & = (\phin \hada \phin)^T \diag(\C_q) 
+\end{align}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

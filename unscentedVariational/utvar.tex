@@ -16,6 +16,9 @@
 \input{macros.tex}
 
 \newcommand{\ut}{{\sc ut}\xspace}
+\newcommand{\rks}{{\sc rks}\xspace}
+\newcommand{\ugp}{{\sc ugp}\xspace}
+
 \newcommand{\x}{\vec{x}}
 \newcommand{\y}{\vec{y}}
 \renewcommand{\xi}{\x^{(i)}}
@@ -43,8 +46,6 @@
 \renewcommand{\P}{P}
 \renewcommand{\k}{\kappa}
 \newcommand{\mathcol}[2]{  \left[#1\right]_{\cdot, #2} } 
-\newcommand{\rks}{{\sc rks}}
-\newcommand{\ugp}{{\sc ugp}}
 \newcommand{\f}{\vec{f}}
 \newcommand{\fn}{\f_{n \cdot}}
 \newcommand{\An}{\mat{A}_n} 
@@ -69,11 +70,15 @@ when used with a Random Kitchen Sink (\rks) approximation to a multiple output
 extension of the unscented Gaussian process of \fix{Steinberg and Bonilla (2014)}. 
 The unscented transform (\ut) is useful within a variational inference framework,
 when we fix the posterior parameters and want to update the linear model. 
-%
+
 We start with deriving the equations for statistical linearization (simply fitting a linear model) 
 through least squares, then using weighted least squares (when each observation has a 
 weight associated with it) and show the equivalent expressions when the \ut
 is used to generate the training data.
+%
+As the posterior of the model factorizes over latent functions, we show that the linearization 
+parameters only depend on the inverse variances of the posterior over the weights of 
+the \rks approximation. 
 
 \section{Statistical Linearization}
 Given $N$ observations $\{ \xi, \yi\}_{i=1}^N$ of a non linear function $\y = g(\x)$, where 
@@ -237,6 +242,7 @@ approximate posterior, there is no correlation across latent functions, i.e.:
 \end{equation}
 Therefore:
 \begin{align}
+	\label{eq:Sigmafn}
 	\Sigmafn &= \diag(\var{\fn}) \text{,} \quad \text{where } \\
 	\label{eq:var-fnq}
 	\var{\fnq} & = (\phin \hada \phin)^T \diag(\C_q)  \text{,}
@@ -277,7 +283,8 @@ With this, the optimal linearization parameters are:
 	\bn & = \ybar - \An \M \phin \\
 	\An &= \Sigmayx \Sigmafn^{-1} \text{,}
 \end{align}
-where we emphasize that  $\Sigmafn$ is a diagonal matrix.
+where we emphasize that  $\Sigmafn$ is a  Q-dimensional diagonal matrix, and is given 
+by Equations \eqref{eq:Sigmafn} and \eqref{eq:var-fnq} .
 
 
 

@@ -56,14 +56,18 @@
 \newcommand{\M}{\mat{M}}
 \renewcommand{\D}{D} 
 \newcommand{\fnq}{f_{nq}}
+\newcommand{\fni}{f_{ni}}
 \newcommand{\var}[1]{\mathbb{V}[#1]}
+\newcommand{\sigmafn}[1]{\vec{e}_{fn}^{(#1)}}
 
 \title{Using the Unscented Transform in Variational Inference}
 \author{Edwin V.~Bonilla}
 \begin{document}
 \maketitle
 We derive the updates for the linearization parameters of a non-linear forward model
-using the unscented transform (\ut). This is useful within a variational inference framework,
+when used with a Random Kitchen Sink (\rks) approximation to a multiple output
+extension of the unscented Gaussian process of \fix{Steinberg and Bonilla (2014)}. 
+The unscented transform (\ut) is useful within a variational inference framework,
 when we fix the posterior parameters and want to update the linear model. 
 %
 We start with deriving the equations for statistical linearization (simply fitting a linear model) 
@@ -205,6 +209,8 @@ Therefore, Equations \eqref{eq:b-w} and  \eqref{eq:A-w} becomes:
 \end{align}
 where $\ybar$ is given in Equation \eqref{eq:ybar-ut}; and 
 $\Sigmayx$ is given in Equation  \eqref{eq:Sigmayx-ut}. 
+
+\todo{figure out if cholesky should be lower or upper triangular}
 %
 \section{Multi-purpose Unscented Kitchen Sinks}
 Would not we like a multi-purpose unscented kitchen sink :-) ? In a Random Kitchen Sink (\rks)
@@ -232,8 +238,49 @@ approximate posterior, there is no correlation across latent functions, i.e.:
 Therefore:
 \begin{align}
 	\Sigmafn &= \diag(\var{\fn}) \text{,} \quad \text{where } \\
-	\var{\fnq} & = (\phin \hada \phin)^T \diag(\C_q) 
+	\label{eq:var-fnq}
+	\var{\fnq} & = (\phin \hada \phin)^T \diag(\C_q)  \text{,}
 \end{align}
+where $\var{\fnq}$ denotes the variance if $\fnq$. \\
+
+With this, we can compute the corresponding sigma points in $\fn$-space  as a function of 
+$\M$ and $\{ \C_q \}$:
+\begin{align}
+	\xo & = \mufn = \M \phin \\
+	\xi & = \M \phin  + \mathcol{\sqrt{ (\Q + \k) \Sigmafn}}{i} \quad i=1, \ldots, \Q \\
+	\xi & = \M \phin  - \mathcol{\sqrt{ (\Q + \k) \Sigmafn}}{i-Q} \quad i=Q+1, \ldots, 2\Q 	\text{.}
+\end{align}
+The expressions above can be further simplified by considering:
+\begin{align}
+	\mathcol{\sqrt{ (\Q + \k) \Sigmafn}}{i} &= \sqrt{ (\Q + \k)} \mathcol{\sqrt{\diag (\var{\fn})} }{i} \\
+	&=  \sqrt{ (\Q + \k)}  \sigmafn{i} \text{,} \quad \text{where }  \sigmafn{i} \in \Re^\Q \text{ and} \\
+	\sigmafn{i} &= [0, 0, \ldots, \underbrace{\sqrt{\var{\fni}}}_{i\mth}, \ldots, 0 ]^T \text{,}
+\end{align}
+and $\var{\fni}$ is defined as in Equation \eqref{eq:var-fnq}. Therefore, the sigma-points can 
+be rewritten as:
+\begin{align}
+\xo & = \mufn = \M \phin \\
+	\xi & = \M \phin +  \sqrt{ (\Q + \k)}  \sigmafn{i} \quad i=1, \ldots, \Q \\
+	\xi & = \M \phin - \sqrt{ (\Q + \k)}  \sigmafn{i-Q} \quad i=Q+1, \ldots, 2\Q \text{,}
+\end{align}
+ and the corresponding observations, weights and stats as before:
+ \begin{align}
+	\yi & = g(\xi) \quad i = 0, \quad \ldots 2\Q\\
+	\wo &= \frac{\k}{\Q + \k} \\
+	\wi &= \frac{1}{2(\Q + \k)}  \quad  i = 1, \ldots, 2\Q  \\
+	\ybar  &=  \sum_{i=0}^{2 \Q} \wi \yi 	\\
+	\Sigmayx  &= \sum_{i=0}^{2\Q} \wi (\yi - \ybar) (\xi - \M \phin)^T \\
+	\Sigmaxx &= \Sigmafn^{-1} \text{.}
+\end{align}
+With this, the optimal linearization parameters are:
+\begin{align}
+	\bn & = \ybar - \An \M \phin \\
+	\An &= \Sigmayx \Sigmafn^{-1} \text{,}
+\end{align}
+where we emphasize that  $\Sigmafn$ is a diagonal matrix.
+
+
+
 
 \end{document}
 

@@ -1,6 +1,6 @@
 % tests unscented transform
 clear all; clc;
-D = 10;
+D = 100;
 m = randn(D,1);
 C = randn(D,D); C = C*C';
 L = chol(C, 'lower');

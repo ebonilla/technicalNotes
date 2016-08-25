@@ -1,0 +1,72 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{epsfig,latexsym,amsbsy,amssymb,amsmath,color, url, natbib, booktabs, multirow,xspace}
+\usepackage{colortbl}
+\usepackage{longtable}
+\usepackage{natbib}
+\usepackage{algorithm,algorithmic}
+\oddsidemargin  0.0in
+\evensidemargin 0.0in
+\textwidth      6.5in
+\headheight     0.0in
+\topmargin     -1.0in
+\textheight=10.0in
+\parindent=0in 
+
+\input{macros}
+
+\newcommand{\vectheta}{\vecS{\theta}}
+\newcommand{\param}{\vecS{\lambda}}
+\newcommand{\obs}{\vec{y}}
+\newcommand{\slike}[1]{\log p(y_{#1}|\vectheta)}
+\newcommand{\prior}{p(\vectheta)}
+\newcommand{\like}[1]{\log p(\obs_{#1} | \vectheta)}
+\newcommand{\post}{q(\vectheta | \param)}
+\newcommand{\nelbo}{{\mathcal{L}}}
+\newcommand{\singlenelbo}[1]{\nelbo^{(#1)}}
+\newcommand{\stepsize}[1]{\alpha_{#1}}
+\newcommand{\batch}[1]{{\mathcal{S}}_{#1}}
+\newcommand{\batchsize}[1]{\abs{\batch{#1}}}
+
+\title{Stochastic Variational Inference --- Minibatch Optimization}
+\author{Edwin V.~Bonilla}
+\begin{document}
+\maketitle
+This note clarifies the objective function and its gradients for the case of minibatch optimization
+in stochastic variational inference. This is needed to make the reader aware that the 
+KL-divergence term in the variational objective needs to be reweigthed so it matches the 
+function decomposition assumed by stochastic optimization algorithms.
+
+For a prior $\prior$, an iid likelihood, $\like{}$ and a variational posterior 
+$\post$ one can usually write the negative evidence lower bound as:
+\begin{align}
+\nelbo &= - \expectation{\post}{\like{}} + \kl{\post}{\prior} \\
+&= \sum_{i=1}^{N} - \expectation{\post}{\slike{i}} +  \kl{\post}{\prior}\\
+&= \sum_{i=1}^{N}  \underbrace{\left(- \expectation{\post}{\slike{i}} + \frac{1}{N}\kl{\post}{\prior} \right)}_{\singlenelbo{i}}
+\end{align}
+Therefore, if one was to carry out optimization via vanila stochastic gradient descend, the update will be:
+\begin{align}
+\param_{k+1} &= \param_k - \stepsize{k} \grad_{\param}{\singlenelbo{k}} \\
+&= \param_k - \stepsize{k} \left(- \grad_{\param}{\expectation{\post}{\slike{k}}} + \frac{1}{N} \grad_{\param} \kl{\post}{\prior} \right) \text{.}
+\end{align}
+Now let us assume the more general case of accessing a batch $\batch{k}$ of size $\batchsize{k}$, then
+the corresponding noisy gradient esitmate is:
+\begin{align}
+\label{eq:minibatch}
+	\grad_{\param}\singlenelbo{k} = - \frac{1}{\batchsize{k}}\sum_{i \in \batch{k}} 
+	 \grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N}  \kl{\post}{\prior} \text{,}
+\end{align}
+where we see that the relative weighting between the expected log likelihood and the KL term is mantained. 
+
+Equation \eqref{eq:minibatch} is the more general form as it considers batch of different sizes.
+If all the batches are of equal size such that $\batchsize{k}=M \ \forall k$, then the number of 
+batches is given by $N_B = N/M$.  Then multiplying Equation  \eqref{eq:minibatch} by $M$ we have:
+\begin{align}
+	\grad_{\param}\singlenelbo{k} = - \sum_{i \in \batch{k}} 
+	\grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N_B}  \kl{\post}{\prior}\text{.}
+\end{align}
+
+
+
+
+\end{document}

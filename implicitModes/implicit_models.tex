@@ -1,0 +1,76 @@
+\documentclass[12pt,a4page]{article}
+\usepackage{latexsym,amsbsy,amssymb,amsmath,color,url,booktabs,multirow}
+\usepackage{graphicx,xspace}
+\usepackage{longtable}
+\usepackage{mathtools}
+\usepackage{algorithm,algpseudocode}
+\usepackage{enumitem}  
+\usepackage[round]{natbib}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\input{macros}
+
+\title{Implicit Probabilistic Models and Variational Inference}
+\author{Edwin V. Bonilla}
+\begin{document}
+	\maketitle
+	\section*{Abstract}
+	This note summarizes recent work on implicit probabilistic models. 
+	\section{Introduction} 
+	\begin{table}[h!]
+		\centering
+		\caption{Notation. }
+		\label{tab-notation}
+		\begin{tabular}{ll}
+			\toprule
+			$\z$ & latent variables\\
+			$\x$ & observed variables \\
+			$\paramprior$ & Prior parameters\\
+			$\paramlike$ & Likelihood parameters \\
+			$\paramjoint$ & $\paramjoint = \{ \paramprior, \paramlike\}$, joint parameters\\
+			$\prior{n}$ & Prior over latent variables \\
+			$\condlike{n}$ & Conditional likelihood \\
+			$\joint{n}$ & joint \\
+			$\varparam$ & variational parameters\\
+			\bottomrule 
+		\end{tabular}
+	\end{table}
+	%
+		\todo{can we exploit some structure by separating the joint prior parameters?}
+		Implicit probablistic models are those that do not define a probability distribution explicitly but instead specify its generative process, i.e.~we can sample from them but not evaluate their density directly. We first define some notation in Table \ref{tab-notation}.
+	We can write a fairly general hierarchical Bayesian model (under the usual \iid assumption\footnote{We note that Gaussian process models do not fit this setting since the prior over latent variables is fully coupled. }) as:
+	\begin{equation}
+		\Joint{} = \priorhyper \prod_{n=1}^{N} \prior{n} \condlike{n}
+	\end{equation}
+	The key thing here is that both the prior  $\prior{n}$ and the conditional likelihood $\condlike{n}$ can be defined through  generative processes, i.e.~without the need to specify their density explicitly. For example,  $\prior{n}$ can be defined via a stochastic neural net and $\condlike{n}$ can be specified via a stochastic physical simulation. In particular, it is worth emphasizing the distinction of this work from previous approaches such as inference in probabilistic models with black-box likelihoods (Ranganeth et al, Bonilla et al, Kingma and Welling, etc). In such works, one of the main assumptions is to be able to evaluate the likelihood of an observation $\condlike{n}$. 
+	
+	Say for example latent variables $\z_n$ are transformed via a non-linear transformation (aka forward model) $g(\z)$ and then observations are  corrupted via additive noise such that $\condlike{n} = \Normal(\x_n; g(\z_n), \sigma^2)$.  
+	Then in this case it is clear we can easily evaluate the likelihood of an observation given the latent variables $\condlike{n}$ by simply passing $\z_n$ through the forward model $g(\z_n)$ and evaluating the Gaussian distribution above. In contrast,  an implicit model is when, for example, the stochastic component is implicit to our forward model $\x_n = g(\z_n; \paramjoint)$ and hence we cannot evaluate the likelihood of an instance $\x_n$ but we  can generate (fantasy) observations from the true model $g(\z_n; \paramjoint)$. 
+	Since we do not have an actual form for the likelihood model (which may be intractable to compute), then Bayesian inference is also intractable. 
+	
+	Traditional approaches to this ``likelihood-free'' setting include e.g.~Approximate Bayesian Computation (ABC, cite). Here we will follow a variational inference approach. 
+	%
+	\section{Likelihood-free variational inference}
+	We can assume an approximate posterior that takes the same factorisation as the true posterior:
+	\begin{equation}
+		\varjoint \defeq \varhyper \prod_{n=1}^N \varcond{n} \text{.,}
+	\end{equation}
+	where $\varparam$ are the variational parameters. 
+	Under the standard variational desiderata, we aim to minimize the KL divergence between the approximate posterior and the true posterior:
+	\begin{align}
+		\kl{\varjoint}{\truejoint} &= \expectation{\varjoint}{\log \frac{\varjoint}{\truejoint}} \\
+		&= \expectation{\varhyper \prod_{n=1}^N \varcond{n}}{\log \frac{ \marglike \varhyper \prod_{n=1}^N \varcond{n}}{\priorhyper \prod_{n=1}^{N} \prior{n} \condlike{n}}} \geq 0 \\
+		\log \marglike & \geq  - \kl{\varhyper}{\priorhyper}  + \sum_{n=1}^{n} \expectation{\varcond{n}}{\log \frac{ \prior{n} \condlike{n} }{\varcond{n}} } \defeq \elbo. 
+	\end{align}
+	%
+	This is perhaps, in our setting, the more general form for the variational objective $\elbo$. 
+	\subsection{Explicit Conditional likelihood}
+	If we have an explicit conditional likelihood $\condlike{n}$ then we can further decompose the objective above as 
+	\begin{align}
+		\elbo = 	 - \kl{\varhyper}{\priorhyper}  -  \sum_{n=1}^N \kl{\varcond{n}}{\prior{n}} +  \sum_{n=1}^n \expectation{\varcond{n}}{\log \condlike{n}} \text{,}
+	\end{align}
+	Were we can use the usual re-parameterization trick to estimate the individual expected log-likelihood terms $\expectation{\varcond{n}}{\log \condlike{n}}$.
+	However, given that both $\varcond{n}$ and $\prior{n}$ can be implicit, we cannot compute or estimate these KL terms directly as we need to evaluate 
+	$\log \varcond{n}$  and $\log \prior{n}$ explicitly. To address this issue, we realize that these terms depend on the log ratio of the densities and, therefore we do not 
+	need to estimate these densities explicitly. 
+\end{document}

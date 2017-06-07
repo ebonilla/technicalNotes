@@ -71,6 +71,16 @@
 	\end{align}
 	Were we can use the usual re-parameterization trick to estimate the individual expected log-likelihood terms $\expectation{\varcond{n}}{\log \condlike{n}}$.
 	However, given that both $\varcond{n}$ and $\prior{n}$ can be implicit, we cannot compute or estimate these KL terms directly as we need to evaluate 
-	$\log \varcond{n}$  and $\log \prior{n}$ explicitly. To address this issue, we realize that these terms depend on the log ratio of the densities and, therefore we do not 
+	$\log \varcond{n}$  and $\log \prior{n}$ explicitly. To address this issue, we realize that these KL terms depend on the log ratio of the densities and, therefore we do not 
 	need to estimate these densities explicitly. 
+
+	In particular, we can write each individual term in the second KL term above as:
+	\begin{align}
+			\kl{\varcond{n}}{\prior{n}}  = \expectation{\varcond{n}}{\log \frac{\varcond{n}}{\prior{n}}} \text{.}
+	\end{align}
+	%
+	\subsubsection{Density estimation}
+	We see that the term above only depends on the log ratio of the densities hence we can apply techniques for density estimation. In particular, we can use e.g. Bickel et al (2007). 
+	Let us denote $\{\samplez_1^p, \ldots, \samplez_N^p \}$  and $\{\samplez_{1}^q, \ldots, \samplez_N^q\}$ as samples from $\prior{}$ and $\varcond{}$ respectively, and the label $y_n=1$ or $y_n=0$ to indicate whether the corresponding  sample  is a true sample from $\prior{}$. 
+	% TODO: Write log loss
 \end{document}

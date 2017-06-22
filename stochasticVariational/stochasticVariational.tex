@@ -19,52 +19,104 @@
 \newcommand{\param}{\vecS{\lambda}}
 \newcommand{\obs}{\vec{y}}
 \newcommand{\slike}[1]{\log p(y_{#1}|\vectheta)}
+\newcommand{\slikesample}[2]{\log p(y_{#1}|\vectheta^{(#2)})}
 \newcommand{\prior}{p(\vectheta)}
 \newcommand{\like}[1]{\log p(\obs_{#1} | \vectheta)}
 \newcommand{\post}{q(\vectheta | \param)}
 \newcommand{\nelbo}{{\mathcal{L}}}
+\newcommand{\ellterm}{{{\mathcal{L}}}_{\text{ell}}}
+\newcommand{\elltermhat}{{\widehat{\mathcal{L}}}_{\text{ell}}}
+\newcommand{\klterm}{{{\mathcal{L}}}_{\text{kl}}}
 \newcommand{\singlenelbo}[1]{\nelbo^{(#1)}}
 \newcommand{\stepsize}[1]{\alpha_{#1}}
-\newcommand{\batch}[1]{{\mathcal{S}}_{#1}}
+\newcommand{\batch}[1]{{\mathcal{Y}}_{#1}}
 \newcommand{\batchsize}[1]{\abs{\batch{#1}}}
 
-\title{Stochastic Variational Inference --- Minibatch Optimization}
+\title{Stochastic Variational Inference --- Mini-batch Optimization}
 \author{Edwin V.~Bonilla}
+\date{Last update: June 22nd, 2017}
 \begin{document}
 \maketitle
-This note clarifies the objective function and its gradients for the case of minibatch optimization
+\begin{abstract}
+This note clarifies the objective function and its gradients for the case of mini-batch optimization
 in stochastic variational inference. This is needed to make the reader aware that the 
-KL-divergence term in the variational objective needs to be reweigthed so it matches the 
-function decomposition assumed by stochastic optimization algorithms.
+KL-divergence term in the variational objective needs to be re-weighted so it matches the 
+function decomposition assumed by stochastic optimization algorithms.	This can also be seen from an alternative point of view where
+the ELL term is re-weighted yielding a doubly-stochastic estimate. Finally, we analyze this estimate in the case of multi-task learning with  likelihoods that decompose over tasks. 
+\end{abstract}
 
-For a prior $\prior$, an iid likelihood, $\like{}$ and a variational posterior 
+\section{The variational objective}
+For a prior $\prior$, an iid likelihood $\like{}$ and a variational posterior 
 $\post$ one can usually write the negative evidence lower bound as:
 \begin{align}
-\nelbo &= - \expectation{\post}{\like{}} + \kl{\post}{\prior} \\
+\nelbo &=  \overbrace{ - \expectation{\post}{\like{}} }^{\ellterm} + \kl{\post}{\prior} \\
 &= \sum_{i=1}^{N} - \expectation{\post}{\slike{i}} +  \kl{\post}{\prior}\\
-&= \sum_{i=1}^{N}  \underbrace{\left(- \expectation{\post}{\slike{i}} + \frac{1}{N}\kl{\post}{\prior} \right)}_{\singlenelbo{i}}
+&= \sum_{i=1}^{N}  \underbrace{\left(  - \expectation{\post}{\slike{i}}  + \frac{1}{N}\kl{\post}{\prior} \right)}_{\singlenelbo{i}}
 \end{align}
-Therefore, if one was to carry out optimization via vanila stochastic gradient descend, the update will be:
+%
+\subsection{Optimization of decomposable functions}
+By writing the variational objective as a sum of individual objectives we can now apply standard stochastic optimization algorithms such as SGD.
+Therefore, if one was to carry out optimization via SGD, the update will be:
 \begin{align}
 \param_{k+1} &= \param_k - \stepsize{k} \grad_{\param}{\singlenelbo{k}} \\
 &= \param_k - \stepsize{k} \left(- \grad_{\param}{\expectation{\post}{\slike{k}}} + \frac{1}{N} \grad_{\param} \kl{\post}{\prior} \right) \text{.}
 \end{align}
-Now let us assume the more general case of accessing a batch $\batch{k}$ of size $\batchsize{k}$, then
-the corresponding noisy gradient esitmate is:
+Now let us assume the more general case of accessing a batch $\batch{b}$ of size $\batchsize{b}$, then
+the corresponding noisy gradient estimate is:
 \begin{align}
 \label{eq:minibatch}
-	\grad_{\param}\singlenelbo{k} = - \frac{1}{\batchsize{k}}\sum_{i \in \batch{k}} 
-	 \grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N}  \kl{\post}{\prior} \text{,}
+	\grad_{\param}\singlenelbo{b} = - \frac{1}{\batchsize{b}}\sum_{i \in \batch{b}} 
+	 \grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N}  \grad_{\param} \kl{\post}{\prior} \text{,}
 \end{align}
 where we see that the relative weighting between the expected log likelihood and the KL term is mantained. 
 
-Equation \eqref{eq:minibatch} is the more general form as it considers batch of different sizes.
-If all the batches are of equal size such that $\batchsize{k}=M \ \forall k$, then the number of 
+Equation \eqref{eq:minibatch} is the more general form as it considers batches of different sizes.
+If all the batches are of equal size such that $\batchsize{b}=M \ \forall b$, then the number of 
 batches is given by $N_B = N/M$.  Then multiplying Equation  \eqref{eq:minibatch} by $M$ we have:
 \begin{align}
-	\grad_{\param}\singlenelbo{k} = - \sum_{i \in \batch{k}} 
-	\grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N_B}  \kl{\post}{\prior}\text{.}
+	\grad_{\param}\singlenelbo{b} &= - \sum_{i \in \batch{b}}  \grad_{\param} \expectation{\post}{\slike{i}} + \frac{1}{N_B}  \grad_{\param}  \kl{\post}{\prior}\text{,} \\
+		\grad_{\param}\singlenelbo{b} &= - \sum_{i \in \batch{b}}  \grad_{\param} \expectation{\post}{\slike{i}} + \frac{M}{N} \grad_{\param}  \kl{\post}{\prior}\text{.}
 \end{align}
+this means that, at each iteration of SGD, we need just to compute the gradients of the expected likelihood (ELL) term for a batch and the weighted KL term.
+ We see that, in terms of optimization, an equivalent expression is given by weighting the ELL term instead:
+ \begin{align}
+ 	\label{eq:gradfinal}
+ 		\grad_{\param}\singlenelbo{b} &= -  \frac{N}{M}  \sum_{i \in \batch{b}}  \grad_{\param} \expectation{\post}{\slike{i}} +  \grad_{\param}  \kl{\post}{\prior}\text{.}
+ \end{align} 
+%
+\section{Estimation of the ELL and doubly-stochastic estimates}
+Let us now consider a Monte Carlo (MC) estimate of the individual ELL terms above using samples $S$ from the posterior:
+\begin{align}
+	\vectheta^{(s)} & \sim \post \text{, } s=1, \ldots, S \\
+	\expectationhat{\post}{\slike{i}}  &= \frac{1}{S} \sum_{s=1}^S  \slikesample{i}{s} \text{,}
+\end{align}
+hence the ELL term is given by:
+\begin{equation}
+ \elltermhat = 	- \frac{N}{M}  \sum_{i \in \batch{b}}  \frac{1}{S} \sum_{s=1}^S  \slikesample{i}{s} \text{,}
+\end{equation}
+which is usually known as a doubly-stochastic estimate, as we first estimate the ELL by averaging over a batch and  multiplying by $N$, and then we estimate the expectation using MC.  
+%
+\section{Multi-task learning with decomposable likelihoods}
+Here we analyze the ELL estimate in the case of multi-task learning with $P$ different outputs and a likelihood that decompose over tasks. Let us denote $y_{nt}$ as the label for task $t$ on datapoint $n$, with $n=1,\ldots, N_t$ and  $t=1, \ldots, P$. I general, these observations do not lie on a grid, i.e.~we do not observe the labels for all tasks at the same input. A simple MC estimate using all the data is given by:
+\begin{align}
+	\elltermhat = \frac{1}{S} \sum_{t=1}^{P} \sum_{n=1}^{N_t} \sum_{s=1}^S \slikesample{nt}{s} \text{.}
+\end{align}
+The easiest way to handle this case for mini-batch optimization is to  collect all the data into the same pot (while keeping track of the identity of the task) and make  $N= \sum_{t=1}^P N_t$. This will allow us to use SGD as above by selecting a batch of datapoints (in general from several tasks) and apply the same weighting as described above in the single-task case:
+\begin{equation}
+\elltermhat = 	- \frac{N}{M}  \sum_{i \in \batch{b}}  \frac{1}{S} \sum_{s=1}^S  \slikesample{i}{s} \text{,}
+\end{equation}
+where the index $i=[n,t]$ now selects a datapoint for a particular task. As above, instead of weighting the ELL we can alternartively weight the KL by $M/N$. 
+
+The above scheme will allow us to raise interest questions. For example, in the active learning scenario, what tasks should I select so I gain the most information about my model? etc.
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,239 @@
+% Constants
+\newglossaryentry{N}{%
+    name=\ensuremath{N},
+    description={number of nodes}
+}
+
+\newglossaryentry{M}{%
+    name=\ensuremath{M},
+    description={number of nodes}
+}
+
+\newglossaryentry{C}{%
+    name=\ensuremath{C},
+    description={number of classes}
+}
+
+\newglossaryentry{K}{%
+    name=\ensuremath{K},
+    description={number of latent factors}
+}
+
+\newglossaryentry{D}{%
+    name=\ensuremath{D},
+    description={number of feature space dimensions}
+}
+
+\newglossaryentry{L}{%
+    name=\ensuremath{L},
+    description={number of neural network layers}
+}
+
+\newglossaryentry{R_max}{%
+    name=\ensuremath{R_{\max}},
+    description={Maximum in the range of integer values that an rating can be assigned}
+}
+
+\newglossaryentry{x_i}{%
+    name=\ensuremath{\mbx_i},
+    description={$\in \mathbb{R}^D$. A \gls{D}-dimensional feature vector associated with $i$th node }
+}
+
+\newglossaryentry{y_i}{%
+    name=\ensuremath{\mby_i},
+    description={$\in \{0, 1\}^{\gls{C}}$. Class label for $i$th node (one-of-\gls{C} binary vector representation)}
+}
+
+\newglossaryentry{X}{%
+    name=\ensuremath{\mbX},
+    description={$= \begin{bmatrix} \mbx_1 & \cdots & \mbx_N \end{bmatrix}^T \in \mathbb{R}^{\gls{N} \times \gls{D}}$ --- feature matrix }
+}
+
+\newglossaryentry{Y}{%
+    name=\ensuremath{\mbY},
+    description={$= \begin{bmatrix} \mby_1 & \cdots & \mby_N \end{bmatrix}^T \in \{0, 1\}^{N \times K}$}
+}
+
+\newglossaryentry{observed_ij}{%
+    name=\ensuremath{I_{ij}},
+    description={$\in \{0, 1\}$}
+}
+
+\newglossaryentry{A_ij}{%
+    name=\ensuremath{A_{ij}},
+    description={$\in \{0, 1\}$ --- adjacency}
+}
+
+\newglossaryentry{R_ij}{%
+    name=\ensuremath{R_{ij}},
+    description={$\in \{0, 1, 2, 3, 4, 5\}$}
+}
+
+\newglossaryentry{O}{%
+    name=\ensuremath{\mbO},
+    description={$\in \{0, 1\}^{\gls{N} \times \gls{M}}$ }
+}
+
+\newglossaryentry{A}{%
+    name=\ensuremath{\mbA},
+    description={$\in \{0, 1\}^{\gls{N} \times \gls{M}}$ }
+}
+
+\newglossaryentry{R}{%
+    name=\ensuremath{\mbR},
+    description={$\gls{N} \times \gls{M}$ ratings matrix. 
+                 Usually takes values from $\{0, 1, 2, 3, 4, 5\}$.
+                 Made suitable for Gaussian observation model by 
+                 normalizing $R_{ij} = \sqrt{6 - R_{ij}}$}
+}
+
+\newglossaryentry{m_u}{%
+    name=\ensuremath{\mbm_{\gls{U}}},
+    description={\gls{K}-dimensional prior mean}
+}
+
+\newglossaryentry{S_u}{%
+    name=\ensuremath{\mbS_{\gls{U}}},
+    description={\gls{K}-dimensional prior covariance}
+}
+
+\newglossaryentry{m_v}{%
+    name=\ensuremath{\mbm_{\gls{V}}},
+    description={\gls{K}-dimensional prior mean}
+}
+
+\newglossaryentry{S_v}{%
+    name=\ensuremath{\mbS_{\gls{V}}},
+    description={\gls{K}-dimensional prior covariance}
+}
+
+\newglossaryentry{m}{%
+    name=\ensuremath{\mbm},
+    description={\gls{K}-dimensional prior mean}
+}
+
+\newglossaryentry{S}{%
+    name=\ensuremath{\mbS},
+    description={\gls{K}-dimensional prior covariance}
+}
+
+\newglossaryentry{Sigma}{%
+    name=\ensuremath{\Sigma},
+    description={$\gls{K} \times \gls{K}$}
+}
+
+\newglossaryentry{alpha}{%
+    name=\ensuremath{\mbalpha},
+    description={$N$ vector}
+}
+
+\newglossaryentry{beta}{%
+    name=\ensuremath{\mbbeta},
+    description={$M$ vector}
+}
+
+\newglossaryentry{alpha_i}{%
+    name=\ensuremath{\alpha_i},
+    description={systematic bias inherent in the $i$th node}
+}
+
+\newglossaryentry{beta_j}{%
+    name=\ensuremath{\beta_j},
+    description={systematic bias inherent in the $j$th node}
+}
+
+\newglossaryentry{gamma}{%
+    name=\ensuremath{\gamma},
+    description={scalar. global bias.}
+}
+
+\newglossaryentry{sigma}{%
+    name=\ensuremath{\sigma},
+    description={Gaussian observation model standard deviation}
+}
+
+\newglossaryentry{sigma_U}{%
+    name=\ensuremath{\sigma_{\gls{U}}},
+    description={scalar. standard deviation.}
+}
+
+\newglossaryentry{sigma_V}{%
+    name=\ensuremath{\sigma_{\gls{V}}},
+    description={scalar. standard deviation.}
+}
+
+\newglossaryentry{sigma_Z}{%
+    name=\ensuremath{\sigma_{\gls{Z}}},
+    description={scalar. standard deviation.}
+}
+
+\newglossaryentry{u_i}{%
+    name=\ensuremath{\mbu_i},
+    description={\gls{K}-dimensional latent factor vector of the $i$th node}
+}
+
+\newglossaryentry{v_j}{%
+    name=\ensuremath{\mbv_j},
+    description={\gls{K}-dimensional latent factor vector of the $j$th node}
+}
+
+\newglossaryentry{z_i}{%
+    name=\ensuremath{\mbz_i},
+    description={\gls{K}-dimensional latent factor vector of the $i$th node}
+}
+
+\newglossaryentry{U}{%
+    name=\ensuremath{\mbU},
+    description={$= \begin{bmatrix} \mbu_1 & \cdots & \mbu_{\gls{N}} \end{bmatrix}^T \in \mathbb{R}^{\gls{N} \times \gls{K}}$}
+}
+
+\newglossaryentry{V}{%
+    name=\ensuremath{\mbV},
+    description={$= \begin{bmatrix} \mbv_1 & \cdots & \mbv_{\gls{M}} \end{bmatrix}^T \in \mathbb{R}^{\gls{M} \times \gls{K}}$}
+}
+
+\newglossaryentry{Z}{%
+    name=\ensuremath{\mbZ},
+    description={$= \begin{bmatrix} \mbz_1 & \cdots & \mbz_{\gls{N}} \end{bmatrix}^T \in \mathbb{R}^{\gls{N} \times \gls{K}}$}
+}
+
+\newglossaryentry{lambda_U}{%
+    name=\ensuremath{\lambda_{\gls{U}}},
+    description={$=\gls{sigma}^2/\gls{sigma_U}^2$. regularization coefficient}
+}
+
+\newglossaryentry{lambda_V}{%
+    name=\ensuremath{\lambda_{\gls{V}}},
+    description={$=\gls{sigma}^2/\gls{sigma_V}^2$. regularization coefficient}
+}
+
+\newglossaryentry{lambda}{%
+    name=\ensuremath{\lambda},
+    description={$=1/\gls{sigma_Z}^2$. regularization coefficient}
+}
+
+\newglossaryentry{theta}{%
+    name=\ensuremath{\mbtheta},
+    description={set of model parameters}
+}
+
+\newglossaryentry{phi}{%
+    name=\ensuremath{\mbphi},
+    description={set of variational parameters}
+}
+
+\newglossaryentry{relu_fn}{%
+    name=\ensuremath{\mathtt{relu}(\cdot)},
+    description={$= \max(0, \cdot)$. The \emph{\acrlong{RELU}} 
+                 non-linear activation function}
+}
+
+\newglossaryentry{sigmoid_fn}{%
+    name=\ensuremath{\Phi},
+    description={The logistic sigmoid function, $\varsigma(x)=1/(1 + \exp(-x))$}
+}
+
+\newglossaryentry{delta_fn}{%
+    name=\ensuremath{\delta},
+    description={The Dirac delta function}
+}

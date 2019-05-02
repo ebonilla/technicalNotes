@@ -1,0 +1,60 @@
+\documentclass{article}
+\input{preamble}
+\input{preamble_acronyms}
+\input{preamble_math}
+
+
+\newcommand{\calR}{\mathcal{R}}
+\newcommand{\ls}{\lambda(s)}
+\newcommand{\ns}{\nu(s)}
+\newcommand{\bbP}{\mathbb{P}}
+
+\title{Understanding the Poisson Point Process}
+\author{Edwin V. Bonilla}
+\begin{document}
+	\maketitle
+	Let us start with deriving the join distribution (or likelihood) of a realization of a \gls{PPP}. Let $\Xi \equiv (\mathcal{N}, \mathcal{X})$  be the joint space of events and $\xi = (n, \{x_1, \ldots, x_n\})$ a single realization, where $\{x_1, \ldots, x_n \}$ denotes a set, i.e.~represents all its possible permutations (i.e.~the order does not matter, the permutations are indistinguishable, etc). We will refer to a single (ordered) instance of this permutation using the tuple notation, i.e.~$(x_1, \ldots, x_n)$.
+	
+	\section{Joint Distribution}
+	
+	$P_{\mathcal{N}}(\cdot)$ is a Poisson distribution with parameter $\int_{\calR} \ls ds$ and $p_{\mathcal{X} | \mathcal{N}} (\cdot) \propto \prod_{i}   \lambda(x_i)$, i.e.~conditioned on the number of events, the joint distribution over the event locations is iid and proportional to the intensity function. 
+	  
+	Hence we can write the joint distribution as:
+	\begin{align}
+	p_{\Xi}(\xi) &= P_{\mathcal{N}}(n) p_{\mathcal{X} | \mathcal{N}}(\{x_1, \ldots, x_n \} | n )\\
+	\label{eq:joint-two}
+	&= \exp\left(-\int_{\calR} \ls ds\right) \frac{\left(\int_{\calR} \ls ds \right)^{n}}{n!} n! \prod_{j=1}^{n}  \frac{\lambda(x_j)}{\int_{\calR} \lambda(s) ds} \\
+	&= \exp\left(-\int_{\calR} \ls ds\right) \prod_{j=1}^{n}  {\lambda(x_j)} \text{,}
+	\end{align}
+	where the term $n!$ preceding the product in \cref{eq:joint-two} comes from the fact that there are $n!$ permutations of the events $\{x_1, \ldots, x_n\}$. 
+	%
+	%The distinction between ordered and unordered (i.e.~distributions over sets or tuples) is not important if $(n, \{x_1, \ldots, x_n\})$ are observed 
+	This is the standard equation in most (if not all) the references as, indeed, the \gls{PPP} places a joint distribution over $(n, \{x_1, \ldots, x_n\})$. However, careful consideration must be taken when one is referring to one set $(n, \{x_1, \ldots, x_n\})$ or to the tuple $(x_1, \ldots, x_n)$ as the conditional density over them differs by a factor of  $n!$. 
+	
+	\section{Augmented Model via Superposition}
+	Here we attempt to understand the augmented models (resulted from a thinning process) from a superposition point of view. This will help us clarify how the final joint distribution in the augmented space comes about but also how it relates to the generative process proposed by Lewis and generalized by Adams to a Sigmoidal Cox process. The main result is that the superposition of two \glspl{PPP} is another \gls{PPP} with intensity function corresponding to the sum of the intensities of the original processes.
+	
+	Let $\Xi$ and $\Psi$ denote the original \glspl{PPP} and their intensities $\ls$ and $\ns$, respectively. If $(n, \{x_1, \ldots, x_n\})$ and $(y, \{_1, \ldots, y_m\})$ are realizations of $\Xi$ and $\Psi$  then the combined realization is $(n + m, \{x_1, \ldots, x_n, y_1, \ldots, y_m \})$.   In the following derivation, \textbf{knowledge of which points originated from which realization is assumed lost}. This is important as in our case we do  know which points are part of the data and which ones are thinned points. 
+	
+	Given the assumption above, the partition of the joint event into an $n$-point realization and an $m$-point realization is unkown so we need to account for all the possible partitions. Let $P_n$ denote the set representing the partition of size $n$ and $P_n^c$ its complement, that is the partition of the remaining $m$ points. Let $\bbP_n$ denote the set of all possible partitions, then we have that the number of posible partitions in $\bbP_n$ is: 
+	\begin{equation}
+		 {(n+m) \choose n} = \frac{(n+m)!}{(n!) (m!)}  \text{.}
+	\end{equation}
+	Denoting $r=n + m$ and $\zeta = (r, \{z_1, \ldots, z_r\})$ as the joint event, and considering that all the partitions are equally likely,  the likelihood of the joint event is the sum over the partitions:
+	\begin{align}
+		p(\zeta) &= \sum_{n=0}^r \frac{1}{{r \choose n }} \sum_{P_n \in \bbP_n} p_{\Xi}(n, P_n)  p_{\Psi}(r-n, P_m^c ) \\
+		&= \sum_{n=0}^r  \frac{n! (r-n)!}{r!} \sum_{P_n \in \bbP_n} 
+		\label{eq:joint-augmented-two}
+		\left( \frac{ \exp\left(-\int_{\calR} \ls ds\right) }{n!} \prod_{z \in P_n} \lambda(z) \right)
+		\left(  \frac{ \exp\left(-\int_{\calR} \ns ds\right) }{(r-n)!}  \prod_{z \in P_n^c} \nu(z) \right) \\
+		&= \frac{ \exp\left(-\int_{\calR} (\ls + \ns) ds\right) }{r!}  \sum_{n=0}^r  \sum_{P_n \in \bbP_n} \left(  \prod_{z \in P_n} \lambda(z)    \prod_{z \in P_n^c} \nu(z) \right)\\
+		& =  \frac{ \exp\left(-\int_{\calR} (\ls + \ns) ds\right) }{r!}   \prod_{i=1}^r (  \lambda(z_i) + \nu(z_i) ) \text{,}
+	\end{align}
+	which is the likelihood of a \gls{PPP} with intensity $\lambda{s} + \nu{s}$.  We note that \cref{eq:joint-augmented-two} alreay includes the weights $n!$ and $(r-n)! = m!$ for each of the conditional distributions due to the unordered assumption (hence, they were not included in the expressions for the corresponding densities). 
+	 
+	 Now we come back to the the assumption above that ``knowledge of which points originated from which realization is assumed lost". Since in augmented space due to thinning \textbf{we do know} which subset corresponds to each process, we do not need to sum across partitions. hence, the joint distribution boils down to 
+	 
+	 \todo{explain how we obtain resulting process with Adam's assumption}
+	 
+	  
+\end{document}

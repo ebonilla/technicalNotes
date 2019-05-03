@@ -20,7 +20,7 @@
 	
 	\section{Joint Distribution}
 	
-	$P_{\mathcal{N}}(\cdot)$ is a Poisson distribution with parameter $\int_{\calR} \ls ds$ and $p_{\mathcal{X} | \mathcal{N}} (\cdot) \propto \prod_{i}   \lambda(x_i)$, i.e.~conditioned on the number of events, the joint distribution over the event locations is iid and proportional to the intensity function. We note that we will omit in the notation that distribution is conditioned in the intensity function $\ls$. This is important when we consider a Cox process where $\ls$ is a stochastic process. 
+	$P_{\mathcal{N}}(\cdot)$ is a Poisson distribution with parameter $\int_{\calR} \ls ds$ and $p_{\mathcal{X} | \mathcal{N}} (\cdot) \propto \prod_{i} p(x_i)$ with $p(x_i) \propto   \lambda(x_i)$, i.e.~conditioned on the number of events, the joint distribution over the event locations is iid and proportional to the intensity function. We note that we will omit in the notation that distribution is conditioned in the intensity function $\ls$. This is important when we consider a Cox process where $\ls$ is a stochastic process. 
 	  
 	Hence we can write the joint distribution as:
 	\begin{align}
@@ -43,12 +43,12 @@
 	The distinction between \cref{eq:joint-three} and \cref{eq:joint-norm} is crucial for our purposes. Both distributions must be normalized. 
 	If we were to integrate over the tuples $(x_1, \ldots, x_n)$ in \cref{eq:joint-norm} then we would obtain a marginal $P_{\mathcal{N}}(n)$ readily normalized. 
 	However, if one were to integrate \cref{eq:joint-three} over $\{x_1, \ldots, x_n \}$ one would need to bring back the $n!$ to obtain a proper marginal $P_{\mathcal{N}}(n)$. 
-	Finally, if $( n, \{x_1, \ldots, x_n \})$  are observed there is not effect in Bayesian inference.  However, if these are latent variables then we need to consider this distinction. 
+	Finally, if $( n, \{x_1, \ldots, x_n \})$  were observed (i.e.~fixed) the difference between sets and tuples would have no impact on parameter estimation / Bayesian inference.  However, if these are latent variables then we need to consider this distinction. 
 		
 	\section{Augmented Model via Superposition}
 	Here we attempt to understand the augmented models (resulted from a thinning process) from a superposition point of view. This will help us clarify how the final joint distribution in the augmented space comes about but also how it relates to the generative process proposed by Lewis and generalized by Adams to a Sigmoidal Cox process. The main result is that the superposition of two \glspl{PPP} is another \gls{PPP} with intensity function corresponding to the sum of the intensities of the original processes.
 	
-	Let $\Xi$ and $\Psi$ denote the original \glspl{PPP} and their intensities $\ls$ and $\ns$, respectively. If $(n, \{x_1, \ldots, x_n\})$ and $(y, \{_1, \ldots, y_m\})$ are realizations of $\Xi$ and $\Psi$  then the combined realization is $(n + m, \{x_1, \ldots, x_n, y_1, \ldots, y_m \})$.   In the following derivation, {knowledge of which points originated from which realization is assumed lost}. This is important as in our case we do  know which points are part of the data and which ones are thinned points. 
+	Let $\Xi$ and $\Psi$ denote the original \glspl{PPP} and their intensities $\ls$ and $\ns$, respectively. If $(n, \{x_1, \ldots, x_n\})$ and $(m, \{y_1, \ldots, y_m\})$ are realizations of $\Xi$ and $\Psi$  then the combined realization is $(n + m, \{x_1, \ldots, x_n, y_1, \ldots, y_m \})$.   In the following derivation, {knowledge of which points originated from which realization is assumed lost}. This is important as in our case we do  know which points are part of the data and which ones are thinned points. 
 	
 	Given the assumption above, the partition of the joint event into an $n$-point realization and an $m$-point realization is unkown so we need to account for all the possible partitions. Let $P_n$ denote the set representing the partition of size $n$ and $P_n^c$ its complement, that is the partition of the remaining $m$ points. Let $\bbP_n$ denote the set of all possible partitions, then we have that the number of posible partitions in $\bbP_n$ is: 
 	\begin{equation}
@@ -56,7 +56,7 @@
 	\end{equation}
 	Denoting $r=n + m$ and $\zeta = (r, \{z_1, \ldots, z_r\})$ as the joint event, and considering that all the partitions are equally likely,  the likelihood of the joint event is the sum over the partitions:
 	\begin{align}
-		p(\zeta) &= \sum_{n=0}^r \frac{1}{{r \choose n }} \sum_{P_n \in \bbP_n} p_{\Xi}(n, P_n)  p_{\Psi}(r-n, P_m^c ) \\
+		p(\zeta) &= \sum_{n=0}^r \frac{1}{{r \choose n }} \sum_{P_n \in \bbP_n} p_{\Xi}(n, P_n)  p_{\Psi}(r-n, P_n^c ) \\
 		&= \sum_{n=0}^r  \frac{n! (r-n)!}{r!} \sum_{P_n \in \bbP_n} 
 		\label{eq:joint-augmented-two}
 		\left( \frac{ \exp\left(-\int_{\calR} \ls ds\right) }{n!} \prod_{z \in P_n} \lambda(z) \right)
@@ -69,7 +69,7 @@
 	 %\todo{Talk about independent scattering here: Scattering, Poisson's gambit}
 	 We can see that underlying the derivation above there is an independence assumption. This may contradict the intuition that if one executes $r$ Bernoulli trials and $n$ and $m$ are the number of heads and tails respectively, these variables are clearly not independent.  The key difference here is that $r$ is in fact drawn from a Poisson distribution and this renders the variables independent. This is due to the fundamental general property of \glspl{PPP} called independent scattering and more specifically, a property known  as Poisson's gambit. More to details are in Streit (2010, \S 2.9.2).  
 	  
-	 \subsection{Relationship to thinning}
+	 \subsection{Relationship to thinning and the Sigmoidal Process}
 	 Now, consider that the intensities of the two original \glspl{PPP} are given by:
 	 \begin{align}
 	 	\label{eq:int-one}
@@ -91,5 +91,5 @@
 	 p(n, m, x_1, \ldots, x_n, y_1, \ldots, y_m) &= 	\frac{1}{n!} \exp\left(-\int_{\calR} \ls ds\right) \prod_{i=1}^{n}  {\lambda(x_i)} 	\frac{1}{m!} \exp\left(-\int_{\calR} \ns ds\right) \prod_{j=1}^{m}  {\nu(y_j)}  \\
 	 &= \frac{1}{n!} \frac{1}{m!}  \exp \left(- \lambda^{\star} \int_{\calR} ds \right) (\lambda^{\star})^{n+m} \prod_{i=1}^{n}  \sigma(g(x_i)) \prod_{j=1}^{m} \sigma(- g(y_j)) ,
 	 \end{align}
-	  where we have used $1 - \sigmoid(y) = \sigmoid(-y)$. Crucially, we have considered a distribution over the latent process to be over tuples $(y_1, \ldots, y_m)$ as we will need to make assumptions (in terms of optimization or expectations) about the support of this distribution that are easier to make considering tuples. In practice, since the term $n!$ is a constant, one can omitted during optimization, .e.g~when doing variational inference. 
+	  where we have used $1 - \sigmoid(y) = \sigmoid(-y)$. Crucially, we have considered a distribution over the latent process to be over tuples $(y_1, \ldots, y_m)$ as we will need to make assumptions (in terms of optimization or expectations) about the support of this distribution that are easier to make considering tuples. In practice, since the term $n!$ is a constant, one can omit it during optimization, e.g~when doing variational inference. 
 \end{document}

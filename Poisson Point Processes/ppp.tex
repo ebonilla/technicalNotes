@@ -20,7 +20,7 @@
 	
 	\section{Joint Distribution}
 	
-	$P_{\mathcal{N}}(\cdot)$ is a Poisson distribution with parameter $\int_{\calR} \ls ds$ and $p_{\mathcal{X} | \mathcal{N}} (\cdot) \propto \prod_{i} p(x_i)$ with $p(x_i) \propto   \lambda(x_i)$, i.e.~conditioned on the number of events, the joint distribution over the event locations is iid and proportional to the intensity function. We note that we will omit in the notation that distribution is conditioned in the intensity function $\ls$. This is important when we consider a Cox process where $\ls$ is a stochastic process. 
+	$P_{\mathcal{N}}(\cdot)$ is a Poisson distribution with parameter $\int_{\calR} \ls ds$ and $p_{\mathcal{X} | \mathcal{N}} (\cdot) = \prod_{i} p(x_i)$ with $p(x_i) \propto   \lambda(x_i)$, i.e.~conditioned on the number of events, the joint distribution over the event locations is iid and proportional to the intensity function. We note that we will omit in the notation that distribution is conditioned in the intensity function $\ls$. This is important when we consider a Cox process where $\ls$ is a stochastic process. 
 	  
 	Hence we can write the joint distribution as:
 	\begin{align}
@@ -83,7 +83,7 @@
 	 
 	 \subsection{Joint distribution of augmented space due to thinning}
 	 As before, let $r = n + m$ be  the total number of events resulting from thinning, $n$ the number of observed events $\{x_i\}_{i=1}^n$ and $m$ the number of latent events  created due to thinning $\{ y_j \}_{j=1}^{m}$. 
-	  Assume the probability of accepting a thinned (i.e.~observed) point $x$ is given by $\sigmoid(g(x))$ and the probability of rejecting it (i.e.~including $y$ it in the augmented set) is $1 - \sigmoid(g(y))$, and let $\mu \equiv \lambda^{\star} \int_{\calR} ds$ be the expected total number of events. 
+	  Assume the probability of accepting a thinned (i.e.~observed) point $x$ is given by $\sigmoid(g(x))$ and the probability of rejecting it (i.e.~including it in the augmented set) is $1 - \sigmoid(g(y))$, and let $\mu \equiv \lambda^{\star} \int_{\calR} ds$ be the expected total number of events. 
 	 
 	 As we have seen above, we can see the realization $(n+m, s_1, \ldots, x_1, \ldots, x_n, y_1, \ldots, y_m )$ as the superposition of two \gls{PPP} with intensities given by  \cref{eq:int-one} and \cref{eq:int-two}. Hence we can write the joint distribution:
 	 
@@ -92,4 +92,7 @@
 	 &= \frac{1}{n!} \frac{1}{m!}  \exp \left(- \lambda^{\star} \int_{\calR} ds \right) (\lambda^{\star})^{n+m} \prod_{i=1}^{n}  \sigma(g(x_i)) \prod_{j=1}^{m} \sigma(- g(y_j)) ,
 	 \end{align}
 	  where we have used $1 - \sigmoid(y) = \sigmoid(-y)$. Crucially, we have considered a distribution over the latent process to be over tuples $(y_1, \ldots, y_m)$ as we will need to make assumptions (in terms of optimization or expectations) about the support of this distribution that are easier to make considering tuples. In practice, since the term $n!$ is a constant, one can omit it during optimization, e.g~when doing variational inference. 
+	  
+	  \todo{write down rejection sampling for a \gls{PPP}}
+	  \todo{Understand more the thinning from Lewis and also the samping algorithm by Adam's}
 \end{document}
